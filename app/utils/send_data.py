@@ -92,7 +92,7 @@ def send_message(message):
                 file_id = data["response"]["document"]["file_id"]
                 file_info = bot.get_file(file_id) 
                 url = 'https://api.telegram.org/file/bot{0}/{1}'.format(TELEGRAM_BOT_TOKEN, file_info.file_path) 
-                body["documenr"] = {
+                body["document"] = {
                     "link": url,
                     "caption": f"{performer} = {title}",
                     "filename":f"{performer} = {title}.mp3"

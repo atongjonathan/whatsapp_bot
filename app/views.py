@@ -88,4 +88,6 @@ def webhook_get():
 def webhook_post():
     return handle_message()
 
-
+@webhook_blueprint.route("/", methods=["GET"])
+def start():
+    return "<h1>Welcome to Spotify SG Whatsapp Bot</h1?"

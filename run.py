@@ -1,6 +1,6 @@
 import logging
 
-from app import create_app
+from . app import create_app
 from threading import Thread
 
 app = create_app()

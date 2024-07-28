@@ -36,7 +36,7 @@ def mark_as_read(message_id):
         )  # 10 seconds timeout as an example
         # Raises an HTTPError if the HTTP request returned an unsuccessful status code
         response.raise_for_status()
-        return jsonify({"status": "Marked", "message": "message:{message_id} marked as read"}), 200
+        return jsonify({"status": "Marked", "message": f"message:{message_id} marked as read"}), 200
     except requests.Timeout as e:
         logging.error(e)
         return jsonify({"status": "error", "message": "Failed to mark message as read"}), 500
@@ -181,5 +181,5 @@ def send_message(message):
             "body": f"This is a {message_type}"
         }
 
-    logging.info(body[message_type])
+    # logging.info(body[message_type])
     call_api(body)

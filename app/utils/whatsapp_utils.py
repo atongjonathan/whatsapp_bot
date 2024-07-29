@@ -3,7 +3,7 @@ import datetime
 import pytz
 # from app.services.openai_service import generate_response
 import re
-# from .send_data import send_text, mark_as_read
+from .send_data import send_text, mark_as_read
 
 
 help = {

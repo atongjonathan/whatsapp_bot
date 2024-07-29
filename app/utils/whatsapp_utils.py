@@ -3,7 +3,7 @@ import datetime
 import pytz
 # from app.services.openai_service import generate_response
 import re
-from .send_data import send_text, mark_as_read
+# from .send_data import send_text, mark_as_read
 
 
 help = {
@@ -16,7 +16,7 @@ help = {
     'snippet': 'Listen to part of the song',
     'ping': 'Test me'
 }
-commands = [f"/{key}" for (key, value) in help.items()]
+commands = [key for (key, value) in help.items()]
 help_text = "The following commands are available: \n\n"
 for key in commands:  # generate help text out of the commands dictionary defined at the top
     help_text += "/" + key + ": "

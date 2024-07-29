@@ -20,7 +20,7 @@ commands = [f"/{key}" for (key, value) in help.items()]
 help_text = "The following commands are available: \n\n"
 for key in commands:  # generate help text out of the commands dictionary defined at the top
     help_text += "/" + key + ": "
-    help_text += commands[key] + "\n"
+    help_text += help[key] + "\n"
 help_text += """
 Example usage:
 /artist Burna Boy or /artist only and reply with the name

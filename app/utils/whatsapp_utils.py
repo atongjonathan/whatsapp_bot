@@ -72,6 +72,7 @@ def process_whatsapp_message(body):
     if message_type == "text":
         text = message["text"]["body"].strip()
         text_list = [word for word in text]
+        print(text_list)
         if text_list[0] in commands:
             send_text(chat_id, help_text, message_id)
 

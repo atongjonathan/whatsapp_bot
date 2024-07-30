@@ -5,7 +5,6 @@ import requests
 import json
 import telebot
 from .spotify import Spotify
-from database import search_db
 
 spotify = Spotify()
 
@@ -18,6 +17,10 @@ headers = {
     "Content-type": "application/json",
     "Authorization": f"Bearer {ACCESS_TOKEN}",
 }
+headersList = {
+        "Accept": "*/*",
+        "Content-Type": "application/json"
+    }
 url = f"https://graph.facebook.com/{VERSION}/{PHONE_NUMBER_ID}/messages"
 message_body = json.dumps(
     {
@@ -35,14 +38,16 @@ def get_downloaded_url(spotify_url, title, performer):
             TELEGRAM_BOT_TOKEN, file_info.file_path)
         return url
     reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
-    headersList = {
-        "Accept": "*/*",
-        "Content-Type": "application/json"
-    }
     response = requests.request("GET", reqUrl, headers=headersList)
     data = response.json()
     url = data["response"]["url"]
     return url
+
+def search_db(title, performer):
+    reqUrl = f"{TG_API_URL}/?title={title}&performer={performer}"
+    payload = ""
+    response = requests.request("POST", reqUrl, data=payload,  headers=headersList)
+    return response.json()["response"]
 
 
 def mark_as_read(message_id):

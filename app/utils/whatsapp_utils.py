@@ -3,31 +3,42 @@ import datetime
 import pytz
 # from app.services.openai_service import generate_response
 import re
-from .send_data import send_text, mark_as_read
+from .send_data import send_text, mark_as_read, send_photo, send_document, send_song
+from .bot import ping, search_song
+from .spotify import Spotify
+import os
+import requests
 
-
+TG_API_URL = os.environ.get("TG_API_URL")
+spotify = Spotify()
 help = {
     # command description used in the "help" command
-    'start': 'Get used to the bot',
+    'start': 'Starts the bot',
     'help': 'Gives you information about the available commands',
-    'song': 'Search for a song',
+    'song': 'Search for a song. Send the song title with the artist separated by a "-"',
     'artist': 'Search for an artist',
     'trending': 'Get hits of the week',
     'snippet': 'Listen to part of the song',
-    'ping': 'Test me'
+    'ping': "Check if I'm alive"
 }
-commands = [key for (key, value) in help.items()]
+commands = [f"/{key}" for (key, value) in help.items()]
 help_text = "The following commands are available: \n\n"
 for key in commands:  # generate help text out of the commands dictionary defined at the top
-    help_text += "/" + key + ": "
-    help_text += help[key] + "\n"
+    help_text += f"`{key}`" + ": "
+    help_text += help[key.replace("/", "")] + "\n"
 help_text += """
 Example usage:
-/artist Burna Boy or /artist only and reply with the name
-/song Closer - Halsey  or /song only and reply with the name
+/artist Burna Boy
+/song Closer - Halsey
 /trending 10 - Get top 10 trending songs on Billboard Top 100
 /snippet Closer - Halsey : Get 30 second preview of the song
+
+*Note*: Songs will be sent in less than a minute depending on server speeds
     """
+
+link_regex = "(https?:\\/\\/)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)?"
+welcome_text = "Welcome to to Spotify SG✨'s bot!. \nText: `/help` to know how to use me!"
+
 
 def convert_time(timestamp):
     utc_time = datetime.datetime.utcfromtimestamp(int(timestamp))
@@ -55,6 +66,20 @@ def process_text_for_whatsapp(text):
     return whatsapp_style_text
 
 
+def get_downloaded_url(spotify_url):
+    reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
+    headersList = {
+        "Accept": "*/*",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.request("GET", reqUrl, headers=headersList)
+    data = response.json()
+    url = data["response"]["url"]
+    print(url)
+    return url
+
+
 def process_whatsapp_message(body):
     number = body["entry"][0]["changes"][0]["value"]["contacts"][0]["wa_id"]
     name = body["entry"][0]["changes"][0]["value"]["contacts"][0]["profile"]["name"]
@@ -66,16 +91,39 @@ def process_whatsapp_message(body):
     logging.info(
         f"Incoming {message_type} message from {name}, phone number: {number} at {convert_time(timestamp)} id: {message_id}")
     mark_as_read(message_id)
-    message_type = message.get("type")
-    message_id = message.get("id")
     chat_id = message.get("from")
+    logging.info(message_id)
     if message_type == "text":
-        text = message["text"]["body"].strip()
-        text_list = [word for word in text]
-        print(text_list)
-        if text_list[0] in commands:
-            send_text(chat_id, help_text, message_id)
-
+        text = message["text"]["body"]
+        if bool(re.match(link_regex, text)):
+            tg_link = get_downloaded_url(text)
+            mini_link = text.split("spotify.com/")[1].split("?")[0]
+            uri = mini_link.split("/")[1]
+            track_details = spotify.get_chosen_song(uri)
+            send_song(tg_link, uri, chat_id, message_id)
+            return
+        queries = text.strip().split(" ")
+        if queries[0] in commands:
+            command = queries[0]
+            if command == "/ping":
+                send_text(chat_id, ping(), message_id)
+            elif command == "/help":
+                send_text(chat_id, help_text, message_id)
+            elif command == "/start":
+                send_text(chat_id, welcome_text, message_id)
+            else:
+                length = len(queries)
+                if length > 1:
+                    if command == "/song":
+                        search_song(" ".join(queries[1:]), chat_id, message_id)
+                else:
+                    send_text(chat_id, help_text, message_id)
+    elif message_type == "interactive":
+        uri = message["interactive"]["list_reply"]["id"]
+        track_details = spotify.get_chosen_song(uri)
+        tg_link = get_downloaded_url(track_details["external_url"])
+        send_song(tg_link, uri, chat_id, message_id)
+        return
 
 
 def is_valid_whatsapp_message(body):

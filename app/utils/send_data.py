@@ -5,6 +5,7 @@ import requests
 import json
 import telebot
 from .spotify import Spotify
+from database import search_db
 
 spotify = Spotify()
 
@@ -26,13 +27,18 @@ message_body = json.dumps(
 TG_API_URL = os.environ.get("TG_API_URL")
 
 
-def get_downloaded_url(spotify_url):
+def get_downloaded_url(spotify_url, title, performer):
+    document = search_db(title, performer)
+    if document["file_id"]:
+        file_info = bot.get_file(data["file_id"])
+        url = 'https://api.telegram.org/file/bot{0}/{1}'.format(
+            TELEGRAM_BOT_TOKEN, file_info.file_path)
+        return url
     reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
     headersList = {
         "Accept": "*/*",
         "Content-Type": "application/json"
     }
-
     response = requests.request("GET", reqUrl, headers=headersList)
     data = response.json()
     url = data["response"]["url"]
@@ -127,8 +133,8 @@ def send_audio(chat_id, link, message_id):
 def send_list_message(chat_id, message_id, title, results):
     rows = [{
         "id": result["uri"],
-        "title": result["artists"] if len(result["artists"])< 24 else result["artists"][:24],
-        "description": result["name"] if len(result["name"])< 24 else result["name"][:72]
+        "title": result["artists"] if len(result["artists"]) < 24 else result["artists"][:24],
+        "description": result["name"] if len(result["name"]) < 24 else result["name"][:72]
     } for result in results]
     body = {
         "messaging_product": "whatsapp",

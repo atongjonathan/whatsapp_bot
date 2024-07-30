@@ -3,11 +3,10 @@ import datetime
 import pytz
 # from app.services.openai_service import generate_response
 import re
-from .send_data import send_text, mark_as_read, send_photo, send_document, send_song
+from .send_data import send_text, mark_as_read,  send_song, get_downloaded_url
 from .bot import ping, search_song
 from .spotify import Spotify
 import os
-import requests
 
 TG_API_URL = os.environ.get("TG_API_URL")
 spotify = Spotify()
@@ -66,19 +65,6 @@ def process_text_for_whatsapp(text):
     return whatsapp_style_text
 
 
-def get_downloaded_url(spotify_url):
-    reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
-    headersList = {
-        "Accept": "*/*",
-        "Content-Type": "application/json"
-    }
-
-    response = requests.request("GET", reqUrl, headers=headersList)
-    data = response.json()
-    url = data["response"]["url"]
-    print(url)
-    return url
-
 
 def process_whatsapp_message(body):
     number = body["entry"][0]["changes"][0]["value"]["contacts"][0]["wa_id"]
@@ -96,10 +82,12 @@ def process_whatsapp_message(body):
     if message_type == "text":
         text = message["text"]["body"]
         if bool(re.match(link_regex, text)):
-            tg_link = get_downloaded_url(text)
-            mini_link = text.split("spotify.com/")[1].split("?")[0]
-            uri = mini_link.split("/")[1]
             track_details = spotify.get_chosen_song(uri)
+            title = track_details["name"]
+            performer = ', '.join(track_details["artists"])
+            tg_link = get_downloaded_url(text, title, performer)
+            mini_link = text.split("spotify.com/")[1].split("?")[0]
+            uri = mini_link.split("/")[1]            
             send_song(tg_link, uri, chat_id, message_id)
             return
         queries = text.strip().split(" ")
@@ -121,7 +109,9 @@ def process_whatsapp_message(body):
     elif message_type == "interactive":
         uri = message["interactive"]["list_reply"]["id"]
         track_details = spotify.get_chosen_song(uri)
-        tg_link = get_downloaded_url(track_details["external_url"])
+        title = track_details["name"]
+        performer = ', '.join(track_details["artists"])
+        tg_link = get_downloaded_url(track_details["external_url"], title, performer)
         send_song(tg_link, uri, chat_id, message_id)
         return
 

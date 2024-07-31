@@ -78,6 +78,11 @@ def process_whatsapp_message(body):
     mark_as_read(message_id)
     chat_id = message.get("from")
     logging.info(message_id)
+    with open("messages.txt") as file:
+        messages = file.readlines()
+        logging.info(f"Message {message_id} present")
+        if message_id+"\n" in messages:
+            return
     if message_type == "text":
         text = message["text"]["body"]
         if bool(re.match(link_regex, text)):
@@ -131,7 +136,8 @@ def process_whatsapp_message(body):
                 else:
                     continue
             if album:
-                send_albums_list_message(chat_id, message_id, f"{of_type.title()}s",  album)
+                send_albums_list_message(
+                    chat_id, message_id, f"{of_type.title()}s",  album)
             else:
                 logging.info(f"Album not found {current_type}")
             return
@@ -148,6 +154,8 @@ def process_whatsapp_message(body):
             track_details["external_url"], title, performer)
         send_song(tg_link, uri, chat_id, message_id)
         return
+    with open("messages.txt", "a") as file:
+        file.write(message_id+"\n")
 
 
 def is_valid_whatsapp_message(body):

@@ -3,7 +3,7 @@ import datetime
 import pytz
 # from app.services.openai_service import generate_response
 import re
-from .send_data import send_text, mark_as_read,  send_song, get_downloaded_url, send_artist, send_album
+from .send_data import send_text, mark_as_read,  send_song, get_downloaded_url, send_artist, send_album, send_albums_list_message
 from .bot import ping, search_song, search_artist
 from .spotify import Spotify
 import os
@@ -116,7 +116,7 @@ def process_whatsapp_message(body):
             # Artists PlayList
             id = message["interactive"]["button_reply"]["id"]
             of_type = id.split("_")[0]
-            uri = uri.split("_")[0]
+            uri = id.split("_")[1]
             artist_details = spotify.get_chosen_artist(uri)
             lists_of_type = [
                 artist_details["artist_singles"]["single"],
@@ -124,14 +124,14 @@ def process_whatsapp_message(body):
                 artist_details["artist_compilations"]["compilation"]
             ]
             types = ['single', 'album', 'compilation']
-            for idx, current_type in types:
+            for idx, current_type in enumerate(types):
                 if of_type == current_type:
                     album = lists_of_type[idx]
                     break
                 else:
                     continue
             if album:
-                send_text(chat_id, album["name"], message_id)
+                send_albums_list_message(chat_id, message_id, f"{of_type.title()}s",  album)
             else:
                 logging.info(f"Album not found {current_type}")
             return

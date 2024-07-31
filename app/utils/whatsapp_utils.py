@@ -109,9 +109,10 @@ def process_whatsapp_message(body):
                 else:
                     send_text(chat_id, help_text, message_id)
     elif message_type == "interactive":
-        uri = message["interactive"]["list_reply"]["id"]
-        logging.info(uri)
-        if 'artist' in uri:
+        try:
+            uri = message["interactive"]["list_reply"]["id"]
+        except Exception:
+            uri = message["interactive"]["button_reply"]["id"]
             send_artist(uri, chat_id, message_id)
             return
         track_details = spotify.get_chosen_song(uri)

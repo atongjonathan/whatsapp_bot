@@ -235,7 +235,6 @@ def send_song(tg_link, uri, chat_id, message_id):
 
 def send_artist(uri, chat_id, message_id):
     artist_details = spotify.get_chosen_artist(uri)
-    name = artist_details["name"]
     lists_of_type = [
         artist_details["artist_singles"]["single"],
         artist_details["artist_albums"]["album"],

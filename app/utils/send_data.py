@@ -272,10 +272,26 @@ def send_artist(uri, chat_id, message_id):
                 },
             "body": {
                     "text": caption
-                    },
+            },
             "action": {
                     "buttons": rows
-                    }
+            }
         }
     }
     call_api(body)
+
+
+def send_album(uri, chat_id, message_id):
+    album_details = spotify.album("", "", uri)
+    caption = f'👤Artist: `{", ".join(album_details["artists"])}`\n📀 Album: `{album_details["name"]}`\n⭐️ Released: `{album_details["release_date"]}`\n🔢 Total Tracks: {album_details["total_tracks"]}'
+    send_photo(chat_id, album_details["images"], caption, message_id)
+    album_tracks = album_details['album_tracks']
+    for track in album_tracks:
+        uri = track["uri"]
+        track_details = spotify.get_chosen_song(uri)
+        file_name = f'{", ".join(track_details["artists"])} - {track_details["name"]}'
+        title = track_details["name"]
+        performer = ', '.join(track_details["artists"])
+        tg_link = get_downloaded_url(
+            track_details["external_url"], title, performer)
+        send_document(chat_id, tg_link, message_id, file_name)

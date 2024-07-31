@@ -3,7 +3,7 @@ import datetime
 import pytz
 # from app.services.openai_service import generate_response
 import re
-from .send_data import send_text, mark_as_read,  send_song, get_downloaded_url, send_artist
+from .send_data import send_text, mark_as_read,  send_song, get_downloaded_url, send_artist, send_album
 from .bot import ping, search_song, search_artist
 from .spotify import Spotify
 import os
@@ -65,7 +65,6 @@ def process_text_for_whatsapp(text):
     return whatsapp_style_text
 
 
-
 def process_whatsapp_message(body):
     number = body["entry"][0]["changes"][0]["value"]["contacts"][0]["wa_id"]
     name = body["entry"][0]["changes"][0]["value"]["contacts"][0]["profile"]["name"]
@@ -105,15 +104,18 @@ def process_whatsapp_message(body):
                     if command == "/song":
                         search_song(" ".join(queries[1:]), chat_id, message_id)
                     elif command == "/artist":
-                        search_artist(" ".join(queries[1:]), chat_id, message_id)
+                        search_artist(
+                            " ".join(queries[1:]), chat_id, message_id)
                 else:
                     send_text(chat_id, help_text, message_id)
     elif message_type == "interactive":
         try:
-            uri = message["interactive"]["list_reply"]["id"] # Single Song or Artist
+            # Single Song or Artist
+            uri = message["interactive"]["list_reply"]["id"]
         except Exception:
-            uri = message["interactive"]["button_reply"]["id"] # Artists PlayList
-            send_text(chat_id, uri, message_id)
+            # Artists PlayList
+            uri = message["interactive"]["button_reply"]["id"]
+            send_album(uri, chat_id, message_id)
             return
         logging.info(uri)
         if 'artist' in uri:
@@ -122,7 +124,8 @@ def process_whatsapp_message(body):
         track_details = spotify.get_chosen_song(uri)
         title = track_details["name"]
         performer = ', '.join(track_details["artists"])
-        tg_link = get_downloaded_url(track_details["external_url"], title, performer)
+        tg_link = get_downloaded_url(
+            track_details["external_url"], title, performer)
         send_song(tg_link, uri, chat_id, message_id)
         return
 

@@ -1,5 +1,5 @@
 import time
-from .send_data import send_list_message, send_text
+from .send_data import send_list_message, send_text, send_artist_list_message
 from .spotify import Spotify
 
 spotify = Spotify()
@@ -44,3 +44,12 @@ def search_song(text, chat_id, message_id):
         send_text(chat_id, NO_RESULTS_MESSAGE, message_id)
         return
     send_list_message(chat_id, message_id, title, possible_tracks)
+
+def search_artist(text, chat_id, message_id):
+    possible_artists = spotify.artist(text)
+    no_of_results = len(possible_artists)
+    NO_RESULTS_MESSAGE = f"`{text}` not found!⚠. Please check your spelling and also include special characters"
+    if no_of_results == 0:
+        send_text(chat_id, NO_RESULTS_MESSAGE, message_id)
+        return
+    send_artist_list_message(chat_id, message_id, text, possible_artists)

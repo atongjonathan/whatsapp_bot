@@ -172,6 +172,37 @@ def send_list_message(chat_id, message_id, title, results):
     }
     call_api(body)
 
+def send_artist_list_message(chat_id, message_id, title, results):
+    rows = [{
+        "id": result["uri"],
+        "title": result["name"] if len(result["name"]) < 24 else result["name"][:21] + "...",
+        "description": result["followers"] + " followers"
+    } for result in results]
+    body = {
+        "messaging_product": "whatsapp",
+        "context": {
+            "message_id": message_id
+        },
+        "recipient_type": "individual",
+        "to": chat_id,
+        "type": "interactive",
+        "interactive": {
+            "type": "list",
+            "body": {
+                "text": f"Here are your results for `{title}`👇"
+            },
+            "action": {
+                "button": "View Results",
+                "sections": [
+                    {
+                        "title": "Choose artist",
+                        "rows": rows
+                    },
+                ]
+            }
+        }
+    }
+    call_api(body)
 
 def send_photo(chat_id, link, caption, message_id):
     body = {

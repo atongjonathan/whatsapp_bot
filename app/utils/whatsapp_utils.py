@@ -4,7 +4,7 @@ import pytz
 # from app.services.openai_service import generate_response
 import re
 from .send_data import send_text, mark_as_read,  send_song, get_downloaded_url
-from .bot import ping, search_song
+from .bot import ping, search_song, search_artist
 from .spotify import Spotify
 import os
 
@@ -104,6 +104,8 @@ def process_whatsapp_message(body):
                 if length > 1:
                     if command == "/song":
                         search_song(" ".join(queries[1:]), chat_id, message_id)
+                    elif command == "/artist":
+                        search_artist(" ".join(queries[1:]), chat_id, message_id)
                 else:
                     send_text(chat_id, help_text, message_id)
     elif message_type == "interactive":

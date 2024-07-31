@@ -114,8 +114,26 @@ def process_whatsapp_message(body):
             uri = message["interactive"]["list_reply"]["id"]
         except Exception:
             # Artists PlayList
-            uri = message["interactive"]["button_reply"]["id"]
-            send_album(uri, chat_id, message_id)
+            id = message["interactive"]["button_reply"]["id"]
+            of_type = id.split("_")[0]
+            uri = uri.split("_")[0]
+            artist_details = spotify.get_chosen_artist(uri)
+            lists_of_type = [
+                artist_details["artist_singles"]["single"],
+                artist_details["artist_albums"]["album"],
+                artist_details["artist_compilations"]["compilation"]
+            ]
+            types = ['single', 'album', 'compilation']
+            for idx, current_type in types:
+                if of_type == current_type:
+                    album = lists_of_type[idx]
+                    break
+                else:
+                    continue
+            if album:
+                send_text(chat_id, album["name"], message_id)
+            else:
+                logging.info(f"Album not found {current_type}")
             return
         logging.info(uri)
         if 'artist' in uri:

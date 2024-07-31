@@ -31,17 +31,22 @@ TG_API_URL = os.environ.get("TG_API_URL")
 
 
 def get_downloaded_url(spotify_url, title, performer):
-    document = search_db(title, performer)
-    if document["file_id"]:
-        file_info = bot.get_file(data["file_id"])
+    response = search_db(title, performer)
+    document = response["document"]
+    logging.info(f"Document: {document}")
+    if document:
+        file_info = bot.get_file(document["file_id"])
         url = 'https://api.telegram.org/file/bot{0}/{1}'.format(
             TELEGRAM_BOT_TOKEN, file_info.file_path)
-        return url
-    reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
-    response = requests.request("GET", reqUrl, headers=headersList)
-    data = response.json()
-    url = data["response"]["url"]
+    else:
+        reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
+        response = requests.request("GET", reqUrl, headers=headersList)
+        data = response.json()
+        url = data["response"]["url"]
+    print(url)
     return url
+
+
 
 def search_db(title, performer):
     reqUrl = f"{TG_API_URL}/?title={title}&performer={performer}"
@@ -138,8 +143,8 @@ def send_audio(chat_id, link, message_id):
 def send_list_message(chat_id, message_id, title, results):
     rows = [{
         "id": result["uri"],
-        "title": result["artists"] if len(result["artists"]) < 24 else result["artists"][:24],
-        "description": result["name"] if len(result["name"]) < 24 else result["name"][:72]
+        "title": result["artists"] if len(result["artists"]) < 24 else result["artists"][:21] + "...",
+        "description": result["name"] if len(result["name"]) < 24 else result["name"][:69] + "..."
     } for result in results]
     body = {
         "messaging_product": "whatsapp",

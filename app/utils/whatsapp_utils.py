@@ -3,7 +3,7 @@ import datetime
 import pytz
 # from app.services.openai_service import generate_response
 import re
-from .send_data import send_text, mark_as_read,  send_song, get_downloaded_url
+from .send_data import send_text, mark_as_read,  send_song, get_downloaded_url, send_artist
 from .bot import ping, search_song, search_artist
 from .spotify import Spotify
 import os
@@ -110,6 +110,10 @@ def process_whatsapp_message(body):
                     send_text(chat_id, help_text, message_id)
     elif message_type == "interactive":
         uri = message["interactive"]["list_reply"]["id"]
+        logging.info(uri)
+        if 'artist' in uri:
+            send_artist(uri, chat_id, message_id)
+            return
         track_details = spotify.get_chosen_song(uri)
         title = track_details["name"]
         performer = ', '.join(track_details["artists"])

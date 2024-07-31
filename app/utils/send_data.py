@@ -18,9 +18,9 @@ headers = {
     "Authorization": f"Bearer {ACCESS_TOKEN}",
 }
 headersList = {
-        "Accept": "*/*",
-        "Content-Type": "application/json"
-    }
+    "Accept": "*/*",
+    "Content-Type": "application/json"
+}
 url = f"https://graph.facebook.com/{VERSION}/{PHONE_NUMBER_ID}/messages"
 message_body = json.dumps(
     {
@@ -47,11 +47,11 @@ def get_downloaded_url(spotify_url, title, performer):
     return url
 
 
-
 def search_db(title, performer):
     reqUrl = f"{TG_API_URL}/?title={title}&performer={performer}"
     payload = ""
-    response = requests.request("POST", reqUrl, data=payload,  headers=headersList)
+    response = requests.request(
+        "POST", reqUrl, data=payload,  headers=headersList)
     return response.json()["response"]
 
 
@@ -172,6 +172,7 @@ def send_list_message(chat_id, message_id, title, results):
     }
     call_api(body)
 
+
 def send_artist_list_message(chat_id, message_id, title, results):
     rows = [{
         "id": result["uri"],
@@ -204,6 +205,7 @@ def send_artist_list_message(chat_id, message_id, title, results):
     }
     call_api(body)
 
+
 def send_photo(chat_id, link, caption, message_id):
     body = {
         "messaging_product": "whatsapp",
@@ -229,3 +231,52 @@ def send_song(tg_link, uri, chat_id, message_id):
     send_photo(chat_id, track_details["image"], caption, message_id)
     file_name = f'{", ".join(track_details["artists"])} - {track_details["name"]}'
     send_document(chat_id, tg_link, message_id, file_name)
+
+
+def send_artist(uri, chat_id, message_id):
+    artist_details = spotify.get_chosen_artist(uri)
+    name = artist_details["name"]
+    lists_of_type = [
+        artist_details["artist_singles"]["single"],
+        artist_details["artist_albums"]["album"],
+        artist_details["artist_compilations"]["compilation"]
+    ]
+    type = ['single', 'album', 'compilation']
+    rows = []
+
+    for idx, item in enumerate(lists_of_type):
+        if (item > 0):
+            row = {
+                "type": "reply",
+                "reply": {
+                    "id": f"{type[idx]}_{uri}",
+                    "title": f"{name}'s {type[idx].title()}s🧐"
+                }
+            }  # Make only when more than 0
+            rows.append(row)
+    caption = f'👤Artist: `{artist_details["name"]}`\n🧑Followers: `{artist_details["followers"]:,}` \n🎭Genre(s): `{", ".join(artist_details["genres"])}` \n'
+    body = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": chat_id,
+        "context": {
+            "message_id": message_id
+        },
+        "type": "interactive",
+        "interactive": {
+                "type": "button",
+                "header": {
+                    "type": "image",
+                    "image": {
+                        "link": artist_details["images"]
+                    }
+                },
+            "body": {
+                    "text": caption
+                    },
+            "action": {
+                    "buttons": rows
+                    }
+        }
+    }
+    call_api(body)

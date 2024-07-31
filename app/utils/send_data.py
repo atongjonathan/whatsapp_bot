@@ -208,8 +208,8 @@ def send_artist_list_message(chat_id, message_id, title, results):
 def send_albums_list_message(chat_id, message_id, title, results):
     rows = [{
         "id": result["uri"],
-        "title": result["name"] if len(result["name"]) < 24 else result["name"][:21] + "...",
-        "description": result["name"][21:72] if len(result["name"]) < 24 else "" + "...",
+        "title": result["name"] if len(result["name"]) < 24 else result["name"][:21] + "-",
+        "description": result["name"][21:72] if len(result["name"]) > 24 else ""
     } for result in results[:10]]
     body = {
         "messaging_product": "whatsapp",

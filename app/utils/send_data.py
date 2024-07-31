@@ -245,12 +245,12 @@ def send_artist(uri, chat_id, message_id):
     rows = []
 
     for idx, item in enumerate(lists_of_type):
-        if (item > 0):
+        if (len(item) > 0):
             row = {
                 "type": "reply",
                 "reply": {
                     "id": f"{type[idx]}_{uri}",
-                    "title": f"{name}'s {type[idx].title()}s🧐"
+                    "title": f"{type[idx].title()}s🧐"
                 }
             }  # Make only when more than 0
             rows.append(row)

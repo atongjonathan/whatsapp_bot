@@ -138,6 +138,8 @@ def process_whatsapp_message(body):
         logging.info(uri)
         if 'artist' in uri:
             send_artist(uri, chat_id, message_id)
+        elif 'album' in uri:
+            send_album(uri, chat_id, message_id)
             return
         track_details = spotify.get_chosen_song(uri)
         title = track_details["name"]

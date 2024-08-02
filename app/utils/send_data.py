@@ -337,3 +337,6 @@ def send_album(uri, chat_id, message_id):
         tg_link = get_downloaded_url(
             track_details["external_url"], title, performer)
         send_document(chat_id, tg_link, message_id, file_name)
+    text =f'Those are all the {track_details["total_tracks"]} track(s) in "`{album_details["name"]}`" by `{", ".join(album_details["artists"])}`. 💪!',
+    send_text(chat_id, text, message_id)
+

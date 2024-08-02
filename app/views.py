@@ -38,7 +38,7 @@ def handle_message():
         status = status_update.get("status")
         timestamp = status_update.get("timestamp")
         recipient_id = status_update.get("recipient_id")
-        logging.info(f"Received a WhatsApp status of {status} from {recipient_id} at {convert_time(timestamp)}, Message ID: {message_id}")
+        # logging.info(f"Received a WhatsApp status of {status} from {recipient_id} at {convert_time(timestamp)}, Message ID: {message_id}")
         return jsonify({"status": "ok"}), 200
 
     try:

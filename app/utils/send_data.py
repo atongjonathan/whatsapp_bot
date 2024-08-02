@@ -149,7 +149,7 @@ def send_audio(chat_id, link, message_id):
     call_api(body)
 
 
-def send_list_message(chat_id, message_id, title, results):
+def send_song_list_message(chat_id, message_id, title, results):
     rows = [{
         "id": result["uri"],
         "title": result["artists"] if len(result["artists"]) < 24 else result["artists"][:21] + "...",
@@ -166,10 +166,10 @@ def send_list_message(chat_id, message_id, title, results):
         "interactive": {
             "type": "list",
             "body": {
-                "text": f"Here are your results for `{title}`👇"
+                "text": f"Song results for `{title}`👇"
             },
             "action": {
-                "button": "View Results",
+                "button": "Song Results",
                 "sections": [
                     {
                         "title": "Choose song",
@@ -199,10 +199,10 @@ def send_artist_list_message(chat_id, message_id, title, results):
         "interactive": {
             "type": "list",
             "body": {
-                "text": f"Here are your results for `{title}`👇"
+                "text": f"`{title}` results👇"
             },
             "action": {
-                "button": "View Results",
+                "button": "View Artist Results",
                 "sections": [
                     {
                         "title": "Choose artist",
@@ -232,7 +232,7 @@ def send_albums_list_message(chat_id, message_id, title, results):
         "interactive": {
             "type": "list",
             "body": {
-                "text": f"Here are your results for `{title}`👇"
+                "text": f"Here are your album results for `{title}`👇"
             },
             "action": {
                 "button": "View Results",

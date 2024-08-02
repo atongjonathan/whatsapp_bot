@@ -37,7 +37,6 @@ Example usage:
     """
 
 link_regex = "(https?:\\/\\/)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)?"
-welcome_text = "Welcome to to Spotify SG✨'s bot!. \nText: `/help` to know how to use me!"
 
 
 def convert_time(timestamp):
@@ -74,14 +73,13 @@ def process_whatsapp_message(body):
     message_type = message.get("type")
     timestamp = message.get("timestamp")
     message_id = message.get("id")
-    logging.info(
-        f"Incoming {message_type} message from {name}, phone number: {number} at {convert_time(timestamp)} id: {message_id}")
+    # logging.info(
+    #     f"Incoming {message_type} message from {name}, phone number: {number} at {convert_time(timestamp)} id: {message_id}")
     try:
         mark_as_read(message_id)
     except Exception as e:
         logging.info(f"Failed to mark as read :{e}")
     chat_id = message.get("from")
-    logging.info(message_id)
     if message_type == "text":
         text = message["text"]["body"]
         if bool(re.match(link_regex, text)):
@@ -101,6 +99,7 @@ def process_whatsapp_message(body):
             elif command == "/help":
                 send_text(chat_id, help_text, message_id)
             elif command == "/start":
+                welcome_text = f"Welcome {name} to to Spotify SG✨'s bot!. \nText: `/help` to know how to use me!"
                 send_text(chat_id, welcome_text, message_id)
             else:
                 length = len(queries)

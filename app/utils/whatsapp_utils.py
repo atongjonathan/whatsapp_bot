@@ -141,18 +141,18 @@ def process_whatsapp_message(body):
             else:
                 logging.info(f"Album not found {current_type}")
             return
-        logging.info(uri)
         if 'artist' in uri:
             send_artist(uri, chat_id, message_id)
         elif 'album' in uri:
             send_album(uri, chat_id, message_id)
             return
-        track_details = spotify.get_chosen_song(uri)
-        title = track_details["name"]
-        performer = ', '.join(track_details["artists"])
-        tg_link = get_downloaded_url(
-            track_details["external_url"], title, performer)
-        send_song(tg_link, uri, chat_id, message_id)
+        elif 'track' in uri:
+            track_details = spotify.get_chosen_song(uri)
+            title = track_details["name"]
+            performer = ', '.join(track_details["artists"])
+            tg_link = get_downloaded_url(
+                track_details["external_url"], title, performer)
+            send_song(tg_link, uri, chat_id, message_id)
         return
     with open("messages.txt", "a") as file:
         file.write(message_id+"\n")

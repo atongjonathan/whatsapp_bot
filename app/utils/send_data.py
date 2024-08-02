@@ -33,12 +33,12 @@ TG_API_URL = os.environ.get("TG_API_URL")
 def get_downloaded_url(spotify_url, title, performer):
     response = search_db(title, performer)
     document = response["document"]
-    logging.info(f"Document: {document}")
     if document:
         file_info = bot.get_file(document["file_id"])
         url = 'https://api.telegram.org/file/bot{0}/{1}'.format(
             TELEGRAM_BOT_TOKEN, file_info.file_path)
     else:
+        logging.info(f"{title} not found in db")
         reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
         try:
             response = requests.request("GET", reqUrl, headers=headersList)

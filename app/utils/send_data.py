@@ -334,8 +334,12 @@ def send_album(uri, chat_id, message_id):
         file_name = f'{", ".join(track_details["artists"])} - {track_details["name"]}'
         title = track_details["name"]
         performer = ', '.join(track_details["artists"])
-        tg_link = get_downloaded_url(
+        try:
+            tg_link = get_downloaded_url(
             track_details["external_url"], title, performer)
+        except Exception as e:
+            logging.info(f"Failed to get url for {track_details['name']}: {e}")
+            pass
         send_document(chat_id, tg_link, message_id, file_name)
     text =f'Those are all the {track_details["total_tracks"]} track(s) in "`{album_details["name"]}`" by `{", ".join(album_details["artists"])}`. 💪!',
     send_text(chat_id, text, message_id)

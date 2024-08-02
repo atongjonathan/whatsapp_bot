@@ -7,7 +7,7 @@ import telebot
 from .spotify import Spotify
 
 spotify = Spotify()
-logging  = getLogger(__name__)
+logging = getLogger(__name__)
 logging.info("Hello")
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID")
@@ -31,24 +31,31 @@ message_body = json.dumps(
 TG_API_URL = os.environ.get("TG_API_URL")
 
 
+def get_url_from_api(spotify_url):
+    reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
+    try:
+        response = requests.request("GET", reqUrl, headers=headersList)
+        data = response.json()
+        url = data["response"]["url"]
+        return url
+    except Exception as e:
+        logging.error(f"Api call failed: {e}")
+        return
+
+
 def get_downloaded_url(spotify_url, title, performer):
     response = search_db(title, performer)
     document = response["document"]
     if document:
-        file_info = bot.get_file(document["file_id"])
-        url = 'https://api.telegram.org/file/bot{0}/{1}'.format(
-            TELEGRAM_BOT_TOKEN, file_info.file_path)
-    else:
-        logging.info(f"{title} not found in db")
-        reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
         try:
-            response = requests.request("GET", reqUrl, headers=headersList)
-            data = response.json()
-            url = data["response"]["url"]
-            return url
-        except Exception as e:
-            logging.error(f"Api call failed: {e}")
-            return
+            file_info = bot.get_file(document["file_id"])
+            url = 'https://api.telegram.org/file/bot{0}/{1}'.format(
+                TELEGRAM_BOT_TOKEN, file_info.file_path)
+        except Exception:
+            url = get_url_from_api(spotify_url)
+    else:
+        url = get_url_from_api(spotify_url)
+    return url
 
 
 def search_db(title, performer):
@@ -307,10 +314,10 @@ def send_artist(uri, chat_id, message_id):
                 },
             "body": {
                     "text": caption
-                },
+            },
             "action": {
                     "buttons": rows
-                }
+            }
         }
     }
     call_api(body)

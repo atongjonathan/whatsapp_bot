@@ -82,11 +82,6 @@ def process_whatsapp_message(body):
         logging.info(f"Failed to mark as read :{e}")
     chat_id = message.get("from")
     logging.info(message_id)
-    with open("messages.txt") as file:
-        messages = file.readlines()
-        logging.info(f"Message {message_id} present")
-        if message_id+"\n" in messages:
-            return
     if message_type == "text":
         text = message["text"]["body"]
         if bool(re.match(link_regex, text)):
@@ -158,8 +153,6 @@ def process_whatsapp_message(body):
                 track_details["external_url"], title, performer)
             send_song(tg_link, uri, chat_id, message_id)
         return
-    with open("messages.txt", "a") as file:
-        file.write(message_id+"\n")
 
 
 def is_valid_whatsapp_message(body):

@@ -112,7 +112,7 @@ def send_text(chat_id, text, message_id):
         "type": "text",
         "text": {
             "preview_url": True,
-            "body": text
+            "body": str(text)
         }
     }
     call_api(body)
@@ -199,10 +199,10 @@ def send_artist_list_message(chat_id, message_id, title, results):
         "interactive": {
             "type": "list",
             "body": {
-                "text": f"`{title}` results👇"
+                "text": f"`Artist results for {title}` 👇 "
             },
             "action": {
-                "button": "View Artist Results",
+                "button": "Artist Results",
                 "sections": [
                     {
                         "title": "Choose artist",

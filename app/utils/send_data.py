@@ -42,12 +42,12 @@ def get_downloaded_url(spotify_url, title, performer):
         reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
         try:
             response = requests.request("GET", reqUrl, headers=headersList)
+            data = response.json()
+            url = data["response"]["url"]
+            return url
         except Exception as e:
             logging.error(f"Api call failed: {e}")
             return
-        data = response.json()
-        url = data["response"]["url"]
-    return url
 
 
 def search_db(title, performer):
@@ -67,9 +67,7 @@ def mark_as_read(message_id):
         })
     try:
         response = requests.post(
-            url, data=body, headers=headers, timeout=10
-        )  # 10 seconds timeout as an example
-        # Raises an HTTPError if the HTTP request returned an unsuccessful status code
+            url, data=body, headers=headers)
         response.raise_for_status()
         return jsonify({"status": "Marked", "message": f"message:{message_id} marked as read"}), 200
     except requests.Timeout as e:
@@ -208,6 +206,7 @@ def send_artist_list_message(chat_id, message_id, title, results):
     }
     call_api(body)
 
+
 def send_albums_list_message(chat_id, message_id, title, results):
     rows = [{
         "id": result["uri"],
@@ -307,10 +306,10 @@ def send_artist(uri, chat_id, message_id):
                 },
             "body": {
                     "text": caption
-            },
+                },
             "action": {
                     "buttons": rows
-            }
+                }
         }
     }
     call_api(body)

@@ -7,7 +7,7 @@ from .send_data import send_text, mark_as_read,  send_song, get_downloaded_url, 
 from .bot import ping, search_song, search_artist
 from .spotify import Spotify
 import os
-logging  = getLogger(__name__)
+logging = getLogger(__name__)
 
 TG_API_URL = os.environ.get("TG_API_URL")
 spotify = Spotify()
@@ -76,7 +76,10 @@ def process_whatsapp_message(body):
     message_id = message.get("id")
     logging.info(
         f"Incoming {message_type} message from {name}, phone number: {number} at {convert_time(timestamp)} id: {message_id}")
-    mark_as_read(message_id)
+    try:
+        mark_as_read(message_id)
+    except Exception as e:
+        logging.info(f"Failed to mark as read :{e}")
     chat_id = message.get("from")
     logging.info(message_id)
     with open("messages.txt") as file:

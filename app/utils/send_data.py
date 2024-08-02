@@ -87,19 +87,11 @@ def call_api(message_body):
     message_body = json.dumps(message_body)
     try:
         response = requests.post(
-            url, data=message_body, headers=headers, timeout=10
-        )  # 10 seconds timeout as an example
-        # Raises an HTTPError if the HTTP request returned an unsuccessful status code
+            url, data=message_body, headers=headers)
         response.raise_for_status()
-        return jsonify({"status": "Sent successfully"}), 200
-    except requests.Timeout:
-        logging.error("Timeout occurred while sending message")
-        return jsonify({"status": "error", "message": "Request timed out"}), 408
-    except (
-        requests.RequestException
-    ) as e:  # This will catch any general request exception
-        logging.error(f"Request failed due with message: {response.text}")
-        return jsonify({"status": "error", "message": "Failed to send message"}), 500
+    except Exception as e:
+        logging.error(f"Error occurred while sending {message_body}: {e}")
+    return
 
 
 def send_text(chat_id, text, message_id):
@@ -199,7 +191,7 @@ def send_artist_list_message(chat_id, message_id, title, results):
         "interactive": {
             "type": "list",
             "body": {
-                "text": f"`Artist results for {title}` 👇 "
+                "text": f"Artist results for `{title}` 👇 "
             },
             "action": {
                 "button": "Artist Results",
@@ -264,15 +256,21 @@ def send_photo(chat_id, link, caption, message_id):
     call_api(body)
 
 
-def send_song(tg_link, uri, chat_id, message_id):
+def send_song(uri, chat_id, message_id):
     track_details = spotify.get_chosen_song(uri)
+    title = track_details["name"]
+    performer = ', '.join(track_details["artists"])
     duration = track_details["duration_ms"]
     minutes = duration // 60000
     seconds = int((duration % 60000) / 1000)
-    caption = f'👤Artist: `{", ".join(track_details["artists"])}`\n🎵Song : `{track_details["name"]}`\n━━━━━━━━━━━━\n📀Album : `{track_details["album"]}`\n🔢Track : {track_details["track_no"]} of {track_details["total_tracks"]}\n⭐️ Released: `{track_details["release_date"]}`\n⌚Duration: `{minutes}:{seconds}`\n🔞Is Explicit: {track_details["explicit"]}\n'
+    caption = f'👤Artist: `{performer}`\n🎵Song : `{title}`\n━━━━━━━━━━━━\n📀Album : `{track_details["album"]}`\n🔢Track : {track_details["track_no"]} of {track_details["total_tracks"]}\n⭐️ Released: `{track_details["release_date"]}`\n⌚Duration: `{minutes}:{seconds}`\n🔞Is Explicit: {track_details["explicit"]}\n'
     send_photo(chat_id, track_details["image"], caption, message_id)
-    file_name = f'{", ".join(track_details["artists"])} - {track_details["name"]}'
+    file_name = f'{performer} - {title}'
+    tg_link = get_downloaded_url(
+        track_details["external_url"], title, performer)
     send_document(chat_id, tg_link, message_id, file_name)
+    completed_text = file_name + "sent successfully. 💪!"
+    send_text(chat_id, completed_text, message_id)
 
 
 def send_artist(uri, chat_id, message_id):
@@ -331,16 +329,15 @@ def send_album(uri, chat_id, message_id):
     for track in album_tracks:
         uri = track["uri"]
         track_details = spotify.get_chosen_song(uri)
-        file_name = f'{", ".join(track_details["artists"])} - {track_details["name"]}'
         title = track_details["name"]
         performer = ', '.join(track_details["artists"])
+        file_name = f'{performer} - {title}'
         try:
             tg_link = get_downloaded_url(
-            track_details["external_url"], title, performer)
+                track_details["external_url"], title, performer)
+            send_document(chat_id, tg_link, message_id, file_name)
+            text = f'Those are all the {track_details["total_tracks"]} track(s) in "`{album_details["name"]}`" by `{", ".join(album_details["artists"])}`. 💪!',
+            send_text(chat_id, text, message_id)
         except Exception as e:
-            logging.info(f"Failed to get url for {track_details['name']}: {e}")
-            pass
-        send_document(chat_id, tg_link, message_id, file_name)
-    text =f'Those are all the {track_details["total_tracks"]} track(s) in "`{album_details["name"]}`" by `{", ".join(album_details["artists"])}`. 💪!',
-    send_text(chat_id, text, message_id)
-
+            logging.info(f"Failed to get send {track_details['name']}: {e}")
+            return

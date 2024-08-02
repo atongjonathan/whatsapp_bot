@@ -40,10 +40,13 @@ def get_downloaded_url(spotify_url, title, performer):
             TELEGRAM_BOT_TOKEN, file_info.file_path)
     else:
         reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
-        response = requests.request("GET", reqUrl, headers=headersList)
+        try:
+            response = requests.request("GET", reqUrl, headers=headersList)
+        except Exception as e:
+            logging.error(f"Api call failed: {e}")
+            return
         data = response.json()
         url = data["response"]["url"]
-    print(url)
     return url
 
 

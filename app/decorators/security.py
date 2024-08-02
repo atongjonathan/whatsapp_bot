@@ -1,9 +1,10 @@
 from functools import wraps
 from flask import current_app, jsonify, request
-import logging
+from logging import getLogger
 import hashlib
 import hmac
 
+logging  = getLogger(__name__)
 
 def validate_signature(payload, signature):
     """

@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import json
 
 from flask import Blueprint, request, jsonify, current_app
@@ -8,7 +8,7 @@ from .utils.whatsapp_utils import (
     process_whatsapp_message,
     is_valid_whatsapp_message,convert_time
 )
-
+logging  = getLogger(__name__)
 
 
 webhook_blueprint = Blueprint("webhook", __name__)

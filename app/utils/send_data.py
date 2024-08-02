@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 from flask import jsonify
 import os
 import requests
@@ -7,7 +7,8 @@ import telebot
 from .spotify import Spotify
 
 spotify = Spotify()
-
+logging  = getLogger(__name__)
+logging.info("Hello")
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")

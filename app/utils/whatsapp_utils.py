@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 import datetime
 import pytz
 # from app.services.openai_service import generate_response
@@ -7,6 +7,7 @@ from .send_data import send_text, mark_as_read,  send_song, get_downloaded_url, 
 from .bot import ping, search_song, search_artist
 from .spotify import Spotify
 import os
+logging  = getLogger(__name__)
 
 TG_API_URL = os.environ.get("TG_API_URL")
 spotify = Spotify()

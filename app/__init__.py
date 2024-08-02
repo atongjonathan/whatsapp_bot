@@ -1,5 +1,5 @@
 from flask import Flask
-from .config import load_configurations, configure_logging
+from .config import load_configurations
 from .views import webhook_blueprint
 
 
@@ -8,7 +8,6 @@ def create_app():
 
     # Load configurations and logging settings
     load_configurations(app)
-    configure_logging()
 
     # Import and register blueprints, if any
     app.register_blueprint(webhook_blueprint)

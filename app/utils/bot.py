@@ -1,6 +1,7 @@
 import time
 from .send_data import send_song_list_message, send_text, send_artist_list_message
 from .spotify import Spotify
+from datetime import datetime
 
 spotify = Spotify()
 
@@ -8,7 +9,7 @@ spotify = Spotify()
 def ping(timestamp):
     start_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S") 
     start_time = time.mktime(start_time)
-    end_time = time.time()
+    end_time = time.mktime(datetime.now())
     elapsed_time_ms = int((end_time - start_time) * 1000)
     return f"Pong! 🏓\nResponse Time: `{elapsed_time_ms} ms`"
 

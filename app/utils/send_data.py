@@ -5,6 +5,7 @@ import requests
 import json
 import telebot
 from .spotify import Spotify
+import time
 
 spotify = Spotify()
 logging = getLogger(__name__)
@@ -45,6 +46,7 @@ def get_url_from_api(spotify_url):
 
 def get_downloaded_url(spotify_url, title, performer):
     response = search_db(title, performer)
+    logging.info(f"Database response: {response}")
     document = response["document"]
     if document:
         try:
@@ -52,6 +54,7 @@ def get_downloaded_url(spotify_url, title, performer):
             url = 'https://api.telegram.org/file/bot{0}/{1}'.format(
                 TELEGRAM_BOT_TOKEN, file_info.file_path)
         except Exception:
+            logging.info()
             url = get_url_from_api(spotify_url)
     else:
         url = get_url_from_api(spotify_url)
@@ -269,7 +272,8 @@ def send_song(uri, chat_id, message_id):
     tg_link = get_downloaded_url(
         track_details["external_url"], title, performer)
     send_document(chat_id, tg_link, message_id, file_name)
-    completed_text = file_name + "sent successfully. 💪!"
+    time.sleep(2)
+    completed_text = f"{file_name} sent successfully. 💪!"
     send_text(chat_id, completed_text, message_id)
 
 

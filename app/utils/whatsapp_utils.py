@@ -95,7 +95,7 @@ def process_whatsapp_message(body):
         if queries[0] in commands:
             command = queries[0]
             if command == "/ping":
-                send_text(chat_id, ping(), message_id)
+                send_text(chat_id, ping(timestamp), message_id)
             elif command == "/help":
                 send_text(chat_id, help_text, message_id)
             elif command == "/start":

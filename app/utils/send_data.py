@@ -46,17 +46,17 @@ def get_url_from_api(spotify_url):
 
 def get_downloaded_url(spotify_url, title, performer):
     response = search_db(title, performer)
-    logging.info(f"Database response: {response}")
     document = response["document"]
     if document:
         try:
             file_info = bot.get_file(document["file_id"])
             url = 'https://api.telegram.org/file/bot{0}/{1}'.format(
                 TELEGRAM_BOT_TOKEN, file_info.file_path)
-        except Exception:
-            logging.info()
+        except Exception as e:
+            logging.error(f"Getting file_info url failed: {e}")
             url = get_url_from_api(spotify_url)
     else:
+        logging.info(f"No document database response: {response}")
         url = get_url_from_api(spotify_url)
     return url
 

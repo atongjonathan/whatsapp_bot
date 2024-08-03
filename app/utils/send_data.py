@@ -113,7 +113,7 @@ def send_text(chat_id, text, message_id):
     call_api(body)
 
 
-def send_document(chat_id, link, message_id, file_name):
+def send_document(chat_id, link, message_id, file_name, caption=None):
     body = {
         "messaging_product": "whatsapp",
         "context": {
@@ -123,9 +123,10 @@ def send_document(chat_id, link, message_id, file_name):
         "type": "document",
         "document": {
             "link": link,
-            "filename": f"{file_name}.mp3"
+            "filename": f"{file_name}.mp3",
         }
     }
+    if caption: body["document"]["caption"] = caption 
     call_api(body)
 
 
@@ -339,9 +340,10 @@ def send_album(uri, chat_id, message_id):
         try:
             tg_link = get_downloaded_url(
                 track_details["external_url"], title, performer)
+            caption = f"🔢Track no : {track_details["track_no"]} of {track_details["total_tracks"]}"
             send_document(chat_id, tg_link, message_id, file_name)
-            text = f'Those are all the {track_details["total_tracks"]} track(s) in "`{album_details["name"]}`" by `{", ".join(album_details["artists"])}`. 💪!',
-            send_text(chat_id, text, message_id)
         except Exception as e:
             logging.info(f"Failed to get send {track_details['name']}: {e}")
             return
+    text = f'Those are all the {track_details["total_tracks"]} track(s) in "`{album_details["name"]}`" by `{", ".join(album_details["artists"])}`. 💪!',
+    send_text(chat_id, text, message_id)

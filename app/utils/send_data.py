@@ -114,6 +114,7 @@ def send_text(chat_id, text, message_id):
 
 
 def send_document(chat_id, link, message_id, file_name, caption=None):
+    if not link: return
     body = {
         "messaging_product": "whatsapp",
         "context": {
@@ -131,6 +132,7 @@ def send_document(chat_id, link, message_id, file_name, caption=None):
 
 
 def send_audio(chat_id, link, message_id):
+    if not link: return
     body = {
         "messaging_product": "whatsapp",
         "context": {
@@ -146,6 +148,7 @@ def send_audio(chat_id, link, message_id):
 
 
 def send_song_list_message(chat_id, message_id, title, results):
+    if not results: return
     rows = [{
         "id": result["uri"],
         "title": result["artists"] if len(result["artists"]) < 24 else result["artists"][:21] + "...",
@@ -179,6 +182,7 @@ def send_song_list_message(chat_id, message_id, title, results):
 
 
 def send_artist_list_message(chat_id, message_id, title, results):
+    if not results: return
     rows = [{
         "id": result["uri"],
         "title": result["name"] if len(result["name"]) < 24 else result["name"][:21] + "...",
@@ -212,6 +216,7 @@ def send_artist_list_message(chat_id, message_id, title, results):
 
 
 def send_albums_list_message(chat_id, message_id, title, results):
+    if not results: return
     rows = [{
         "id": result["uri"],
         "title": result["name"] if len(result["name"]) < 24 else result["name"][:21] + "-",
@@ -245,6 +250,7 @@ def send_albums_list_message(chat_id, message_id, title, results):
 
 
 def send_photo(chat_id, link, caption, message_id):
+    if not link: return
     body = {
         "messaging_product": "whatsapp",
         "to": chat_id,

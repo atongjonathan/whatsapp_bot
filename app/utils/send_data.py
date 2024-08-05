@@ -346,7 +346,7 @@ def send_album(uri, chat_id, message_id):
             tg_link = get_downloaded_url(
                 track_details["external_url"], title, performer)
             caption = f"🔢Track no : {track_details['track_no']} of {track_details['total_tracks']}"
-            send_document(chat_id, tg_link, message_id, file_name)
+            send_document(chat_id, tg_link, message_id, file_name, caption)
         except Exception as e:
             logging.info(f"Failed to get send {track_details['name']}: {e}")
             return

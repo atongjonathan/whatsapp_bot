@@ -45,7 +45,7 @@ def get_url_from_api(spotify_url):
 
 
 def get_downloaded_url(spotify_url, title, performer):
-    response = search_db(title, performer)
+    response = search_db(title.replace('&', '%26'), performer.replace('&', '%26'))
     document = response["document"]
     try:
         file_info = bot.get_file(document["file_id"])

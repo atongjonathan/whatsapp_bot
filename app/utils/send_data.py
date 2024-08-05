@@ -233,7 +233,7 @@ def send_albums_list_message(chat_id, message_id, title, results):
         "interactive": {
             "type": "list",
             "body": {
-                "text": f"Here are your album results for `{title}`👇"
+                "text": f"Here are the `{title}` results👇"
             },
             "action": {
                 "button": "View Results",
@@ -346,7 +346,7 @@ def send_album(uri, chat_id, message_id):
         try:
             tg_link = get_downloaded_url(
                 track_details["external_url"], title, performer)
-            caption = f"🔢Track no : {track_details["track_no"]} of {track_details["total_tracks"]}"
+            caption = f"🔢Track no : {track_details['track_no']} of {track_details['total_tracks']}"
             send_document(chat_id, tg_link, message_id, file_name)
         except Exception as e:
             logging.info(f"Failed to get send {track_details['name']}: {e}")

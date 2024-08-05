@@ -1,16 +1,15 @@
-from logging import getLogger
+import logging
 from flask import jsonify
 import os
 import requests
 import json
 import telebot
 from .spotify import Spotify
+from .database import search_db, get_url_from_api
 import time
 from urllib.parse import quote
 
 spotify = Spotify()
-logging = getLogger(__name__)
-logging.info("Hello")
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -25,24 +24,6 @@ headersList = {
     "Content-Type": "application/json"
 }
 url = f"https://graph.facebook.com/{VERSION}/{PHONE_NUMBER_ID}/messages"
-message_body = json.dumps(
-    {
-        "messaging_product": "whatsapp",
-        "context": ""
-    })
-TG_API_URL = os.environ.get("TG_API_URL")
-
-
-def get_url_from_api(spotify_url):
-    reqUrl = f"{TG_API_URL}?track_url={spotify_url}"
-    try:
-        response = requests.request("GET", reqUrl, headers=headersList)
-        data = response.json()
-        url = data["response"]["url"]
-        return url
-    except Exception as e:
-        logging.error(f"Api call failed: {e}")
-        return
 
 
 def get_downloaded_url(spotify_url, title, performer):
@@ -57,14 +38,6 @@ def get_downloaded_url(spotify_url, title, performer):
             f"Getting file_info url failed: {e}: {title}, {performer}]")
         url = get_url_from_api(spotify_url)
     return url
-
-
-def search_db(title, performer):
-    reqUrl = f"{TG_API_URL}/?title={title}&performer={performer}"
-    payload = ""
-    response = requests.request(
-        "POST", reqUrl, data=payload,  headers=headersList)
-    return response.json()["response"]
 
 
 def mark_as_read(message_id):
@@ -332,10 +305,10 @@ def send_artist(uri, chat_id, message_id):
                 },
             "body": {
                     "text": caption
-                },
+            },
             "action": {
                     "buttons": rows
-                }
+            }
         }
     }
     call_api(body)

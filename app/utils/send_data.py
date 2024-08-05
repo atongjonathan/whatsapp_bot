@@ -6,7 +6,7 @@ import json
 import telebot
 from .spotify import Spotify
 import time
-from requests.exceptions import RequestException
+from urllib.parse import quote
 
 spotify = Spotify()
 logging = getLogger(__name__)
@@ -46,16 +46,15 @@ def get_url_from_api(spotify_url):
 
 
 def get_downloaded_url(spotify_url, title, performer):
-    title = title.replace('&', '%26')
-    performer = performer.replace('&', '%26')
-    response = search_db(title, performer)
+    response = search_db(quote(title), quote(performer))
     document = response["document"]
     try:
         file_info = bot.get_file(document["file_id"])
         url = 'https://api.telegram.org/file/bot{0}/{1}'.format(
             TELEGRAM_BOT_TOKEN, file_info.file_path)
     except Exception as e:
-        logging.error(f"Getting file_info url failed: {e}: {title}, {performer}]")
+        logging.error(
+            f"Getting file_info url failed: {e}: {title}, {performer}]")
         url = get_url_from_api(spotify_url)
     return url
 
@@ -88,13 +87,15 @@ def mark_as_read(message_id):
 def call_api(message_body):
     message_body = json.dumps(message_body)
     response = requests.post(
-            url, data=message_body, headers=headers)
-    if response.ok : return
+        url, data=message_body, headers=headers)
+    if response.ok:
+        return
     elif response.status_code == 400:
         time.sleep(3)
         call_api(message_body)
-    else :
-        logging.error(f"Error occurred while sending {message_body}: {response.status_code}, {response.reason}")     
+    else:
+        logging.error(
+            f"Error occurred while sending {message_body}: {response.status_code}, {response.reason}")
     return
 
 
@@ -115,7 +116,8 @@ def send_text(chat_id, text, message_id):
 
 
 def send_document(chat_id, link, message_id, file_name, caption=None):
-    if not link: return
+    if not link:
+        return
     body = {
         "messaging_product": "whatsapp",
         "context": {
@@ -128,12 +130,14 @@ def send_document(chat_id, link, message_id, file_name, caption=None):
             "filename": f"{file_name}.mp3",
         }
     }
-    if caption: body["document"]["caption"] = caption 
+    if caption:
+        body["document"]["caption"] = caption
     call_api(body)
 
 
 def send_audio(chat_id, link, message_id):
-    if not link: return
+    if not link:
+        return
     body = {
         "messaging_product": "whatsapp",
         "context": {
@@ -149,7 +153,8 @@ def send_audio(chat_id, link, message_id):
 
 
 def send_song_list_message(chat_id, message_id, title, results):
-    if not results: return
+    if not results:
+        return
     rows = [{
         "id": result["uri"],
         "title": result["artists"] if len(result["artists"]) < 24 else result["artists"][:21] + "...",
@@ -183,7 +188,8 @@ def send_song_list_message(chat_id, message_id, title, results):
 
 
 def send_artist_list_message(chat_id, message_id, title, results):
-    if not results: return
+    if not results:
+        return
     rows = [{
         "id": result["uri"],
         "title": result["name"] if len(result["name"]) < 24 else result["name"][:21] + "...",
@@ -217,7 +223,8 @@ def send_artist_list_message(chat_id, message_id, title, results):
 
 
 def send_albums_list_message(chat_id, message_id, title, results):
-    if not results: return
+    if not results:
+        return
     rows = [{
         "id": result["uri"],
         "title": result["name"] if len(result["name"]) < 24 else result["name"][:21] + "-",
@@ -251,7 +258,8 @@ def send_albums_list_message(chat_id, message_id, title, results):
 
 
 def send_photo(chat_id, link, caption, message_id):
-    if not link: return
+    if not link:
+        return
     body = {
         "messaging_product": "whatsapp",
         "to": chat_id,
@@ -324,10 +332,10 @@ def send_artist(uri, chat_id, message_id):
                 },
             "body": {
                     "text": caption
-            },
+                },
             "action": {
                     "buttons": rows
-            }
+                }
         }
     }
     call_api(body)

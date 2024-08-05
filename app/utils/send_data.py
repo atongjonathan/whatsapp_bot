@@ -6,6 +6,7 @@ import json
 import telebot
 from .spotify import Spotify
 import time
+from requests.exceptions import RequestException
 
 spotify = Spotify()
 logging = getLogger(__name__)
@@ -84,12 +85,14 @@ def mark_as_read(message_id):
 
 def call_api(message_body):
     message_body = json.dumps(message_body)
-    try:
-        response = requests.post(
+    response = requests.post(
             url, data=message_body, headers=headers)
-        response.raise_for_status()
-    except Exception as e:
-        logging.error(f"Error occurred while sending {message_body}: {e}")
+    if response.ok : return
+    elif response.status_code == 400:
+        time.sleep(3)
+        call_api(message_body)
+    else :
+        logging.error(f"Error occurred while sending {message_body}: {response.status_code}, {response.reason}")     
     return
 
 

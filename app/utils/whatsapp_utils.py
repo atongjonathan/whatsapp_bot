@@ -74,7 +74,7 @@ def process_whatsapp_message(body):
     message_type = message.get("type")
     timestamp = message.get("timestamp")
     message_id = message.get("id")
-    response = search_db(doc=message)
+    response = search_db("","", doc=message)
     logging.info(response)
     if response: return
     try:

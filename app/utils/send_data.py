@@ -5,7 +5,7 @@ import requests
 import json
 import telebot
 from .spotify import Spotify
-from .database import search_db, get_url_from_api
+from .database import search_db, get_url_from_api, delete_doc
 import time
 from urllib.parse import quote
 
@@ -35,7 +35,9 @@ def get_downloaded_url(spotify_url, title, performer):
             TELEGRAM_BOT_TOKEN, file_info.file_path)
     except Exception as e:
         logging.error(
-            f"Getting file_info url failed: {e}: {title}, {performer}]")
+            f"Getting file_info url failed: {e}: {document}")
+        response = delete_doc(document)
+        logging.info(response)
         url = get_url_from_api(spotify_url)
     return url
 

@@ -16,8 +16,11 @@ def search_db(title, performer):
         "POST", reqUrl, data=payload,  headers=headersList)
     return response.json()["response"]
 
-def delete_doc():
-    pass
+def delete_doc(document):
+    reqUrl = f"{TG_API_URL}/"
+    response = requests.request(
+        "DELETE", reqUrl, data=document,  headers=headersList)
+    return response.json()["response"]
 
 def insert_doc():
     pass

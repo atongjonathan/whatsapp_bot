@@ -9,7 +9,7 @@ spotify = Spotify()
 def ping(timestamp):
     start_time = time.strptime(timestamp, "%Y-%m-%d %H:%M:%S") 
     start_time = time.mktime(start_time)
-    end_time = time.mktime(datetime.now())
+    end_time = time.time()
     elapsed_time_ms = int((end_time - start_time) * 1000)
     return f"Pong! 🏓\nResponse Time: `{elapsed_time_ms} ms`"
 

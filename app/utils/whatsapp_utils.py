@@ -83,13 +83,7 @@ def process_whatsapp_message(body):
     if message_type == "text":
         text = message["text"]["body"]
         if bool(re.match(link_regex, text)):
-            mini_link = text.split("spotify.com/")[1].split("?")[0]
-            uri = mini_link.split("/")[1]
-            track_details = spotify.get_chosen_song(uri)
-            title = track_details["name"]
-            performer = ', '.join(track_details["artists"])
-            tg_link = get_downloaded_url(text, title, performer)
-            send_song(tg_link, uri, chat_id, message_id)
+            send_song(text, chat_id, message_id)
             return
         queries = text.strip().split(" ")
         if queries[0] in commands:

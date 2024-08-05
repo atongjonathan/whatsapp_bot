@@ -7,7 +7,6 @@ import telebot
 from .spotify import Spotify
 from .database import search_db, get_url_from_api, delete_doc
 import time
-from urllib.parse import quote
 
 spotify = Spotify()
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
@@ -27,7 +26,7 @@ url = f"https://graph.facebook.com/{VERSION}/{PHONE_NUMBER_ID}/messages"
 
 
 def get_downloaded_url(spotify_url, title, performer):
-    response = search_db(quote(title), quote(performer))
+    response = search_db(title, performer)
     document = response["document"]
     try:
         file_info = bot.get_file(document["file_id"])

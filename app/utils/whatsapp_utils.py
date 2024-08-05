@@ -5,6 +5,7 @@ import pytz
 import re
 from .send_data import *
 from .bot import ping, search_song, search_artist
+from .database import search_db, insert_doc
 from .spotify import Spotify
 import os
 logging = getLogger(__name__)
@@ -73,8 +74,9 @@ def process_whatsapp_message(body):
     message_type = message.get("type")
     timestamp = message.get("timestamp")
     message_id = message.get("id")
-    # logging.info(
-    #     f"Incoming {message_type} message from {name}, phone number: {number} at {convert_time(timestamp)} id: {message_id}")
+    response = search_db(doc=message)
+    logging.info(response)
+    if response: return
     try:
         mark_as_read(message_id)
     except Exception as e:
@@ -140,7 +142,8 @@ def process_whatsapp_message(body):
             return
         elif 'track' in uri:
             send_song(uri, chat_id, message_id)
-        return
+        insert_doc_response = insert_doc(message)
+        logging.info(insert_doc_response)
 
 
 def is_valid_whatsapp_message(body):

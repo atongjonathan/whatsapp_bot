@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 import datetime
 import pytz
 # from app.services.openai_service import generate_response
@@ -8,7 +8,6 @@ from .bot import ping, search_song, search_artist
 from .database import search_db, insert_doc
 from .spotify import Spotify
 import os
-logging = getLogger(__name__)
 
 TG_API_URL = os.environ.get("TG_API_URL")
 spotify = Spotify()
@@ -74,9 +73,11 @@ def process_whatsapp_message(body):
     message_type = message.get("type")
     timestamp = message.get("timestamp")
     message_id = message.get("id")
-    response = search_db("","", doc=message)
-    logging.info(response)
-    if response: return
+    doc_search = {"id": message_id}
+    response = search_db("","", doc=doc_search)
+    if response["document"]:
+        logging.info("Doc found {message_id}")
+        return
     try:
         mark_as_read(message_id)
     except Exception as e:
@@ -142,8 +143,7 @@ def process_whatsapp_message(body):
             return
         elif 'track' in uri:
             send_song(uri, chat_id, message_id)
-        insert_doc_response = insert_doc(message)
-        logging.info(insert_doc_response)
+    insert_doc_response = insert_doc(message)
 
 
 def is_valid_whatsapp_message(body):

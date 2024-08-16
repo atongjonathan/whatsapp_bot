@@ -5,7 +5,7 @@ import requests
 import json
 import telebot
 from .spotify import Spotify
-from .database import search_db, get_url_from_api, delete_doc
+from .database import search_db, get_url_from_api, delete_doc, insert_doc
 import time
 
 spotify = Spotify()
@@ -27,6 +27,7 @@ url = f"https://graph.facebook.com/{VERSION}/{PHONE_NUMBER_ID}/messages"
 
 def get_downloaded_url(spotify_url, title, performer):
     response = search_db(title, performer)
+    logging.info(f"Database response: {response.json()}")
     document = response["document"]
     try:
         file_info = bot.get_file(document["file_id"])
@@ -306,22 +307,16 @@ def send_artist(uri, chat_id, message_id):
                 },
             "body": {
                     "text": caption
-            },
+                    },
             "action": {
                     "buttons": rows
-            }
+                    }
         }
     }
     call_api(body)
 
 
-def send_album(uri, chat_id, message_id):
-    doc_search = {"id": message_id}
-    logging.info(f"Sending album: {doc_search}")
-    response = search_db("","", doc=doc_search)
-    if response["document"]:
-        logging.info(f"Doc found {message_id}")
-        return    
+def send_album(uri, chat_id, message_id):  
     album_details = spotify.album("", "", uri)
     caption = f'👤Artist: `{", ".join(album_details["artists"])}`\n📀 Album: `{album_details["name"]}`\n⭐️ Released: `{album_details["release_date"]}`\n🔢 Total Tracks: {album_details["total_tracks"]}'
     send_photo(chat_id, album_details["images"], caption, message_id)

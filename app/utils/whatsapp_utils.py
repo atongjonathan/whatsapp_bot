@@ -88,27 +88,27 @@ def process_whatsapp_message(body):
         text = message["text"]["body"]
         if bool(re.match(link_regex, text)):
             send_song(text, chat_id, message_id)
-            return
-        queries = text.strip().split(" ")
-        if queries[0] in commands:
-            command = queries[0]
-            if command == "/ping":
-                send_text(chat_id, ping(convert_time(timestamp)), message_id)
-            elif command == "/help":
-                send_text(chat_id, help_text, message_id)
-            elif command == "/start":
-                welcome_text = f"Welcome {name} to to Spotify SG✨'s bot!. \nText: `/help` to know how to use me!"
-                send_text(chat_id, welcome_text, message_id)
-            else:
-                length = len(queries)
-                if length > 1:
-                    if command == "/song":
-                        search_song(" ".join(queries[1:]), chat_id, message_id)
-                    elif command == "/artist":
-                        search_artist(
-                            " ".join(queries[1:]), chat_id, message_id)
-                else:
+        else:
+            queries = text.strip().split(" ")
+            if queries[0] in commands:
+                command = queries[0]
+                if command == "/ping":
+                    send_text(chat_id, ping(convert_time(timestamp)), message_id)
+                elif command == "/help":
                     send_text(chat_id, help_text, message_id)
+                elif command == "/start":
+                    welcome_text = f"Welcome {name} to to Spotify SG✨'s bot!. \nText: `/help` to know how to use me!"
+                    send_text(chat_id, welcome_text, message_id)
+                else:
+                    length = len(queries)
+                    if length > 1:
+                        if command == "/song":
+                            search_song(" ".join(queries[1:]), chat_id, message_id)
+                        elif command == "/artist":
+                            search_artist(
+                                " ".join(queries[1:]), chat_id, message_id)
+                    else:
+                        send_text(chat_id, help_text, message_id)
     elif message_type == "interactive":
         try:
             # Single Song or Artist
@@ -141,7 +141,6 @@ def process_whatsapp_message(body):
             send_artist(uri, chat_id, message_id)
         elif 'album' in uri:
             send_album(uri, chat_id, message_id)
-            return
         elif 'track' in uri:
             send_song(uri, chat_id, message_id)
     insert_doc_response = insert_doc(message)

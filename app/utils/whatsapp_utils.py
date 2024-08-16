@@ -76,7 +76,7 @@ def process_whatsapp_message(body):
     doc_search = {"id": message_id}
     response = search_db("","", doc=doc_search)
     if response["document"]:
-        logging.info("Doc found {message_id}")
+        logging.info(f"Doc found {message_id}")
         return
     try:
         mark_as_read(message_id)
@@ -144,6 +144,7 @@ def process_whatsapp_message(body):
         elif 'track' in uri:
             send_song(uri, chat_id, message_id)
     insert_doc_response = insert_doc(message)
+    logging.info(insert_doc_response)
 
 
 def is_valid_whatsapp_message(body):

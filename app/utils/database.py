@@ -60,7 +60,7 @@ def insert_doc(doc: dict):
 
     payload = json.dumps({
         "collection": "whatsapp",
-        "database": "whatsapp",
+        "database": "sgbot",
         "dataSource": "Cluster0",
         "document": doc
     })
@@ -77,7 +77,7 @@ def delete_doc(document):
 
     payload = json.dumps({
         "collection": "whatsapp",
-        "database": "songs",
+        "database": "sgbot",
         "dataSource": "Cluster0",
         "document": document
     })

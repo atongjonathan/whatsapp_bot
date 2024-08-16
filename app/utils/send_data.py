@@ -316,6 +316,12 @@ def send_artist(uri, chat_id, message_id):
 
 
 def send_album(uri, chat_id, message_id):
+    doc_search = {"id": message_id}
+    logging.info(f"Sending album: {doc_search}")
+    response = search_db("","", doc=doc_search)
+    if response["document"]:
+        logging.info(f"Doc found {message_id}")
+        return    
     album_details = spotify.album("", "", uri)
     caption = f'👤Artist: `{", ".join(album_details["artists"])}`\n📀 Album: `{album_details["name"]}`\n⭐️ Released: `{album_details["release_date"]}`\n🔢 Total Tracks: {album_details["total_tracks"]}'
     send_photo(chat_id, album_details["images"], caption, message_id)

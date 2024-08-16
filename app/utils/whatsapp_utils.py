@@ -72,6 +72,7 @@ def process_whatsapp_message(body):
     message = body["entry"][0]["changes"][0]["value"]["messages"][0]
     message_type = message.get("type")
     timestamp = message.get("timestamp")
+    timestamp = convert_time(timestamp)
     message_id = message.get("id")
     doc_search = {"id": message_id}
     response = search_db("","", doc=doc_search)

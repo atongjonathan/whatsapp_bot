@@ -27,7 +27,7 @@ url = f"https://graph.facebook.com/{VERSION}/{PHONE_NUMBER_ID}/messages"
 
 def get_downloaded_url(spotify_url, title, performer):
     response = search_db(title, performer)
-    logging.info(f"Database response: {response.json()}")
+    logging.info(f"Database response: {response}")
     document = response["document"]
     try:
         file_info = bot.get_file(document["file_id"])

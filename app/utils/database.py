@@ -91,9 +91,13 @@ def get_url_from_api(spotify_url):
     try:
         response = requests.request("POST", reqUrl, headers=headersList)
         data = response.json()
-        url = data["response"]["url"]
-        return url
     except Exception as e:
-        logging.error(f"Api call failed: {e}")
+        logging.error(f"Api call failed: {str(e)}")
         return
+    try:
+        url = data["response"]["url"]
+        return url    
+    except Exception as e:
+         logging.error(f"Api call failed: {str(e)}, response: {data}")
+
 

@@ -72,79 +72,85 @@ def process_whatsapp_message(body):
     message = body["entry"][0]["changes"][0]["value"]["messages"][0]
     message_type = message.get("type")
     timestamp = message.get("timestamp")
-    timestamp = convert_time(timestamp)
-    message_id = message.get("id")
-    doc_search = {"id": message_id}
-    response = search_db("","", doc=doc_search)
-    if response["document"]:
-        logging.info(f"Doc found {message_id}")
-        return
     try:
-        mark_as_read(message_id)
-    except Exception as e:
-        logging.info(f"Failed to mark as read :{e}")
-    chat_id = message.get("from")
-    if message_type == "text":
-        text = message["text"]["body"]
-        if bool(re.match(link_regex, text)):
-            send_song(text, chat_id, message_id)
-        else:
-            queries = text.strip().split(" ")
-            if queries[0] in commands:
-                command = queries[0]
-                if command == "/ping":
-                    send_text(chat_id, ping(convert_time(timestamp)), message_id)
-                elif command == "/help":
-                    send_text(chat_id, help_text, message_id)
-                elif command == "/start":
-                    welcome_text = f"Welcome {name} to to Spotify SG✨'s bot!. \nText: `/help` to know how to use me!"
-                    send_text(chat_id, welcome_text, message_id)
-                else:
-                    length = len(queries)
-                    if length > 1:
-                        if command == "/song":
-                            search_song(" ".join(queries[1:]), chat_id, message_id)
-                        elif command == "/artist":
-                            search_artist(
-                                " ".join(queries[1:]), chat_id, message_id)
-                    else:
-                        send_text(chat_id, help_text, message_id)
-    elif message_type == "interactive":
-        try:
-            # Single Song or Artist
-            uri = message["interactive"]["list_reply"]["id"]
-        except Exception:
-            # Artists PlayList
-            id = message["interactive"]["button_reply"]["id"]
-            of_type = id.split("_")[0]
-            uri = id.split("_")[1]
-            artist_details = spotify.get_chosen_artist(uri)
-            lists_of_type = [
-                artist_details["artist_singles"]["single"],
-                artist_details["artist_albums"]["album"],
-                artist_details["artist_compilations"]["compilation"]
-            ]
-            types = ['single', 'album', 'compilation']
-            for idx, current_type in enumerate(types):
-                if of_type == current_type:
-                    album = lists_of_type[idx]
-                    break
-                else:
-                    continue
-            if album:
-                send_albums_list_message(
-                    chat_id, message_id, f"{of_type.title()}s",  album)
-            else:
-                logging.info(f"Album not found {current_type}")
+        timestamp = convert_time(timestamp)
+        message_id = message.get("id")
+        doc_search = {"id": message_id}
+        response = search_db("", "", doc=doc_search)
+        if response["document"]:
+            logging.info(f"Doc found {message_id}")
             return
-        if 'artist' in uri:
-            send_artist(uri, chat_id, message_id)
-        elif 'album' in uri:
-            send_album(uri, chat_id, message_id)
-        elif 'track' in uri:
-            send_song(uri, chat_id, message_id)
-    insert_doc_response = insert_doc(message)
-    logging.info(insert_doc_response)
+        try:
+            mark_as_read(message_id)
+        except Exception as e:
+            logging.info(f"Failed to mark as read :{e}")
+        chat_id = message.get("from")
+        if message_type == "text":
+            text = message["text"]["body"]
+            if bool(re.match(link_regex, text)):
+                send_song(text, chat_id, message_id)
+            else:
+                queries = text.strip().split(" ")
+                if queries[0] in commands:
+                    command = queries[0]
+                    if command == "/ping":
+                        send_text(chat_id, ping(
+                            convert_time(timestamp)), message_id)
+                    elif command == "/help":
+                        send_text(chat_id, help_text, message_id)
+                    elif command == "/start":
+                        welcome_text = f"Welcome {name} to to Spotify SG✨'s bot!. \nText: `/help` to know how to use me!"
+                        send_text(chat_id, welcome_text, message_id)
+                    else:
+                        length = len(queries)
+                        if length > 1:
+                            if command == "/song":
+                                search_song(
+                                    " ".join(queries[1:]), chat_id, message_id)
+                            elif command == "/artist":
+                                search_artist(
+                                    " ".join(queries[1:]), chat_id, message_id)
+                        else:
+                            send_text(chat_id, help_text, message_id)
+        elif message_type == "interactive":
+            try:
+                # Single Song or Artist
+                uri = message["interactive"]["list_reply"]["id"]
+            except Exception:
+                # Artists PlayList
+                id = message["interactive"]["button_reply"]["id"]
+                of_type = id.split("_")[0]
+                uri = id.split("_")[1]
+                artist_details = spotify.get_chosen_artist(uri)
+                lists_of_type = [
+                    artist_details["artist_singles"]["single"],
+                    artist_details["artist_albums"]["album"],
+                    artist_details["artist_compilations"]["compilation"]
+                ]
+                types = ['single', 'album', 'compilation']
+                for idx, current_type in enumerate(types):
+                    if of_type == current_type:
+                        album = lists_of_type[idx]
+                        break
+                    else:
+                        continue
+                if album:
+                    send_albums_list_message(
+                        chat_id, message_id, f"{of_type.title()}s",  album)
+                else:
+                    logging.info(f"Album not found {current_type}")
+                return
+            if 'artist' in uri:
+                send_artist(uri, chat_id, message_id)
+            elif 'album' in uri:
+                send_album(uri, chat_id, message_id)
+            elif 'track' in uri:
+                send_song(uri, chat_id, message_id)
+        insert_doc_response = insert_doc(message)
+        logging.info(insert_doc_response)
+    except Exception as e:
+        print(e)
+        send_text(chat_id, "An error occured please try again later", message_id)
 
 
 def is_valid_whatsapp_message(body):

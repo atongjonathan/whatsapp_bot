@@ -149,7 +149,7 @@ def process_whatsapp_message(body):
         insert_doc_response = insert_doc(message)
         logging.info(insert_doc_response)
     except Exception as e:
-        print(e)
+        logging.info(str(e))
         send_text(chat_id, "An error occured please try again later", message_id)
 
 

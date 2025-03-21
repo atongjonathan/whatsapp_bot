@@ -161,6 +161,40 @@ def send_song_list_message(chat_id, message_id, title, results):
     }
     call_api(body)
 
+def send_trailers_list_message(chat_id, message_id, results):
+    if not results:
+        return
+    rows = [{
+        "id": result.get("previewUrl"),
+        "title": result["trackName"] if len(result["trackName"]) < 24 else result["trackName"][:21] + "...",
+        "description": result["shortDescription"] if len(result["shortDescription"]) < 24 else result["shortDescription"][:69] + "..."
+    } for result in results]
+    body = {
+        "messaging_product": "whatsapp",
+        "context": {
+            "message_id": message_id
+        },
+        "recipient_type": "individual",
+        "to": chat_id,
+        "type": "interactive",
+        "interactive": {
+            "type": "list",
+            "body": {
+                "text": f"Trailer results found`👇"
+            },
+            "action": {
+                "button": "Trailer Results",
+                "sections": [
+                    {
+                        "title": "Choose trailer",
+                        "rows": rows
+                    },
+                ]
+            }
+        }
+    }
+    call_api(body)
+
 
 def send_artist_list_message(chat_id, message_id, title, results):
     if not results:
@@ -266,7 +300,8 @@ def send_song(uri, chat_id, message_id):
     time.sleep(2)
     # completed_text = f"{file_name} sent successfully. 💪!"
     # send_text(chat_id, completed_text, message_id)
-
+def send_trailer(uri, chat_id, message_id):
+    send_document(chat_id, uri, message_id, "trailer")
 
 def send_artist(uri, chat_id, message_id):
     artist_details = spotify.get_chosen_artist(uri)

@@ -4,7 +4,7 @@ import pytz
 # from app.services.openai_service import generate_response
 import re
 from .send_data import *
-from .bot import ping, search_song, search_artist
+from .bot import ping, search_song, search_artist, search_trailer
 from .database import search_db, insert_doc
 from .spotify import Spotify
 import os
@@ -110,6 +110,9 @@ def process_whatsapp_message(body):
                             elif command == "/artist":
                                 search_artist(
                                     " ".join(queries[1:]), chat_id, message_id)
+                            elif command == "/trailer":
+                                search_trailer(
+                                    " ".join(queries[1:]), chat_id, message_id)                                
                         else:
                             send_text(chat_id, help_text, message_id)
         elif message_type == "interactive":
@@ -146,6 +149,8 @@ def process_whatsapp_message(body):
                 send_album(uri, chat_id, message_id)
             elif 'track' in uri:
                 send_song(uri, chat_id, message_id)
+            elif 'itunes' in uri:
+                send_trailer(uri, chat_id, message_id)
         insert_doc_response = insert_doc(message)
         logging.info(insert_doc_response)
     except Exception as e:

@@ -60,7 +60,6 @@ def search_artist(text, chat_id, message_id):
 
 
 def search_trailer(text, chat_id, message_id):
-    logging.info("Searching trailer, ", text)
     reqUrl = f"https://itunes.apple.com/search?term={text}&entity=movie&media=movie"
     response = requests.get(reqUrl)
     data = response.json()

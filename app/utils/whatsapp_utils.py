@@ -19,7 +19,8 @@ help = {
     'artist': 'Search for an artist',
     'trending': 'Get hits of the week',
     'snippet': 'Listen to part of the song',
-    'ping': "Check if I'm alive"
+    'ping': "Check if I'm alive",
+    'trailer' : "Search for a movie trailer"
 }
 commands = [f"/{key}" for (key, value) in help.items()]
 help_text = "The following commands are available: \n\n"
@@ -91,6 +92,7 @@ def process_whatsapp_message(body):
                 send_song(text, chat_id, message_id)
             else:
                 queries = text.strip().split(" ")
+                logging.info(queries[0])
                 if queries[0] in commands:
                     command = queries[0]
                     if command == "/ping":
@@ -101,6 +103,10 @@ def process_whatsapp_message(body):
                     elif command == "/start":
                         welcome_text = f"Welcome {name} to to Spotify SG✨'s bot!. \nText: `/help` to know how to use me!"
                         send_text(chat_id, welcome_text, message_id)
+                    elif command == "/trailer":
+                        logging.info("Trailer %s requested"," ".join(queries[1:]))
+                        search_trailer(
+                                    " ".join(queries[1:]), chat_id, message_id)
                     else:
                         length = len(queries)
                         if length > 1:
@@ -110,10 +116,7 @@ def process_whatsapp_message(body):
                             elif command == "/artist":
                                 search_artist(
                                     " ".join(queries[1:]), chat_id, message_id)
-                            elif command == "/trailer":
-                                logging.info("Trailer %s requested"," ".join(queries[1:]))
-                                search_trailer(
-                                    " ".join(queries[1:]), chat_id, message_id)                                
+
                         else:
                             send_text(chat_id, help_text, message_id)
         elif message_type == "interactive":

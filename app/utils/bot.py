@@ -1,3 +1,4 @@
+import logging
 import time
 from .send_data import send_song_list_message, send_text, send_artist_list_message, send_trailers_list_message
 from .spotify import Spotify
@@ -59,14 +60,17 @@ def search_artist(text, chat_id, message_id):
 
 
 def search_trailer(text, chat_id, message_id):
+    logging.info("Searching trailer, ", text)
     reqUrl = f"https://itunes.apple.com/search?term={text}&entity=movie&media=movie"
     response = requests.get(reqUrl)
     data = response.json()
     results = data.get("results")
     if not results:
         NO_RESULTS_MESSAGE = f"`{text}` results not found!⚠"
+        logging.info(NO_RESULTS_MESSAGE)
         return send_text(chat_id, NO_RESULTS_MESSAGE, message_id)
     if len(results) == 0:
         NO_TRAILERS_MESSAGE = f"`No trailers of {text}` were found!⚠. Please check your spelling and also include special characters"
+        logging.info(NO_TRAILERS_MESSAGE)
         return send_text(chat_id, NO_TRAILERS_MESSAGE, message_id)
     send_trailers_list_message(chat_id, message_id, results)

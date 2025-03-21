@@ -162,6 +162,7 @@ def send_song_list_message(chat_id, message_id, title, results):
     call_api(body)
 
 def send_trailers_list_message(chat_id, message_id, results):
+    logging.info("Processing trailers")
     if not results:
         return
     rows = [{

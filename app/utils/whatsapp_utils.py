@@ -111,6 +111,7 @@ def process_whatsapp_message(body):
                                 search_artist(
                                     " ".join(queries[1:]), chat_id, message_id)
                             elif command == "/trailer":
+                                logging.info("Trailer %s requested"," ".join(queries[1:]))
                                 search_trailer(
                                     " ".join(queries[1:]), chat_id, message_id)                                
                         else:

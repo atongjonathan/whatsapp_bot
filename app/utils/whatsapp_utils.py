@@ -4,7 +4,7 @@ import pytz
 # from app.services.openai_service import generate_response
 import re
 from .send_data import *
-from .bot import ping, search_song, search_artist, search_trailer
+from .bot import ping, search_movie, search_song, search_artist, search_trailer
 from .database import search_db, insert_doc
 from .spotify import Spotify
 import os
@@ -20,7 +20,8 @@ help = {
     'trending': 'Get hits of the week',
     'snippet': 'Listen to part of the song',
     'ping': "Check if I'm alive",
-    'trailer' : "Search for a movie trailer"
+    'trailer' : "Search for a movie trailer",
+    'movie': "Get movie details"
 }
 commands = [f"/{key}" for (key, value) in help.items()]
 help_text = "The following commands are available: \n\n"
@@ -107,6 +108,10 @@ def process_whatsapp_message(body):
                         logging.info("Trailer %s requested"," ".join(queries[1:]))
                         search_trailer(
                                     " ".join(queries[1:]), chat_id, message_id)
+                    elif command == "/movie":
+                        logging.info("Movie %s requested"," ".join(queries[1:]))
+                        search_movie(
+                                    " ".join(queries[1:]), chat_id, message_id)
                     else:
                         length = len(queries)
                         if length > 1:
@@ -155,6 +160,8 @@ def process_whatsapp_message(body):
                 send_song(uri, chat_id, message_id)
             elif 'itunes' in uri:
                 send_trailer(uri, chat_id, message_id)
+            elif 'tt' in uri:
+                send_movie(uri, chat_id, message_id)
         insert_doc_response = insert_doc(message)
         logging.info(insert_doc_response)
     except Exception as e:

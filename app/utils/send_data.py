@@ -1,9 +1,12 @@
+import datetime
 import logging
+from urllib.parse import quote
 from flask import jsonify
 import os
 import requests
 import json
 import telebot
+
 from .spotify import Spotify
 from .database import search_db, get_url_from_api, delete_doc, insert_doc
 import time
@@ -41,7 +44,17 @@ def get_downloaded_url(spotify_url, title, performer):
         url = get_url_from_api(spotify_url)
     return url
 
+def get_trailer_link(tmdbid):
+    reqUrl = f"https://imdb-api.atongjonathan2.workers.dev/title/{tmdbid}"
+    response = requests.get(reqUrl)
+    response.raise_for_status()
+    result = response.json()
+    logging.info(tmdbid)
+    logging.info(json.dumps(result))
+    link = result.get("previewUrl")
+    return link
 
+ 
 def mark_as_read(message_id):
     body = json.dumps(
         {
@@ -161,6 +174,7 @@ def send_song_list_message(chat_id, message_id, title, results):
     }
     call_api(body)
 
+
 def send_trailers_list_message(chat_id, message_id, results):
     logging.info("Processing trailers")
     if not results:
@@ -188,6 +202,42 @@ def send_trailers_list_message(chat_id, message_id, results):
                 "sections": [
                     {
                         "title": "Choose trailer",
+                        "rows": rows
+                    },
+                ]
+            }
+        }
+    }
+    call_api(body)
+
+
+def send_movies_list_message(chat_id, message_id, results):
+    logging.info("Processing trailers")
+    if not results:
+        return
+    rows = [{
+        "id": result.get("id"),
+        "title": result.get("title"),
+        "description":  result.get("year"),
+    } for result in results]
+    body = {
+        "messaging_product": "whatsapp",
+        "context": {
+            "message_id": message_id
+        },
+        "recipient_type": "individual",
+        "to": chat_id,
+        "type": "interactive",
+        "interactive": {
+            "type": "list",
+            "body": {
+                "text": f"Movie results found`👇"
+            },
+            "action": {
+                "button": "Movie Results",
+                "sections": [
+                    {
+                        "title": "Choose movie",
                         "rows": rows
                     },
                 ]
@@ -301,8 +351,63 @@ def send_song(uri, chat_id, message_id):
     time.sleep(2)
     # completed_text = f"{file_name} sent successfully. 💪!"
     # send_text(chat_id, completed_text, message_id)
+
+
 def send_trailer(uri, chat_id, message_id):
     send_document(chat_id, uri, message_id, "trailer")
+
+
+def generate_movie_text(movie):
+    try:
+        release_date = movie.get('releaseDetailed', {}).get('date', 'N/A')
+        release_date = datetime.datetime.strptime(
+            release_date, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%d-%m-%Y") if release_date != 'N/A' else 'N/A'
+    except Exception as e:
+        release_date = 'N/A'
+        logging.exception(f"Error parsing release date: {e}")
+    url = f"https://movies.atongjona.com/watch/{quote(movie.get('title'))}"
+    movie_text = f"""
+📹 *Title:* {movie.get('title', 'N/A')}
+🎬 *Watch:* {url}
+🕰 *Duration:* {movie.get('runtime', 'N/A')}
+📉 *Rating:* {movie.get('rating', {}).get('star', 'N/A')}⭐️ from {movie.get('rating', {}).get('count', 0)} users
+🗓️ *Release Date:* {release_date}
+📟 *Genre:* {', '.join(movie.get('genre', ['N/A']))}
+🌎 *Country:* {', '.join([loc.get('country', 'Unknown') for loc in movie.get('releaseDetailed', {}).get('originLocations', [])])}
+🗣 *Language:* {', '.join([lang.get('language', 'Unknown') for lang in movie.get('spokenLanguages', [])])}
+
+🙎 *Cast Info:*
+👉 *Director:* {', '.join([director for director in movie.get('directors', ['N/A'])])}
+🎎 *Stars:* {', '.join([actor for actor in movie.get('actors', ['N/A'])])}
+
+🏆 *Awards:* {movie.get('award', {}).get('wins', 0)} wins & {movie.get('award', {}).get('nominations', 0)} nominations
+
+📜 *Summary:* {movie.get('plot', 'No plot available.')}
+
+"""
+    return movie_text
+
+
+def search_movie(id):
+    reqUrl = f"https://imdb-api.atongjonathan2.workers.dev/title/{id}"
+    response = requests.get(reqUrl)
+    response.raise_for_status()
+    movie = response.json()
+    return movie
+
+
+def send_movie(uri, chat_id, message_id):
+    try:
+        movie = search_movie(uri)
+        text = generate_movie_text(movie)
+        send_photo(chat_id, movie["image"], text, message_id)
+        trailer_link = get_trailer_link(uri)
+        logging.info("Trailer link: %s", trailer_link)
+        send_document(chat_id, trailer_link, message_id, "trailer.mp4")
+    except Exception as e:
+        logging.info("An error occured %s", e)
+    
+
 
 def send_artist(uri, chat_id, message_id):
     artist_details = spotify.get_chosen_artist(uri)
@@ -343,16 +448,16 @@ def send_artist(uri, chat_id, message_id):
                 },
             "body": {
                     "text": caption
-                    },
+                },
             "action": {
                     "buttons": rows
-                    }
+                }
         }
     }
     call_api(body)
 
 
-def send_album(uri, chat_id, message_id):  
+def send_album(uri, chat_id, message_id):
     album_details = spotify.album("", "", uri)
     caption = f'👤Artist: `{", ".join(album_details["artists"])}`\n📀 Album: `{album_details["name"]}`\n⭐️ Released: `{album_details["release_date"]}`\n🔢 Total Tracks: {album_details["total_tracks"]}'
     send_photo(chat_id, album_details["images"], caption, message_id)
